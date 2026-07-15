@@ -1,0 +1,41 @@
+# Local environment
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Monorepo siblings (must never be published from this repo)
+10_knowledge_base/
+20_mails/
+03_reviews/
+90_finance/
+91_family/
+00_career_management/
+04_papers/
+06_projects/
+07_internships/
+08_learning/
+09_implementations/
+30_media/
+40_literature/
+50_law/
+70_publishing houses/
+71_universities/
+personal_cloud/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Optional: internal one-off debug runs (uncomment to exclude from public repo)
+# scripts/_debug_*.py

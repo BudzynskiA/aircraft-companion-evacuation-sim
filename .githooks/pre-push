@@ -1,0 +1,14 @@
+#!/bin/sh
+# Block push if any tracked path escapes the simulation publish boundary.
+# Enable locally (once per clone):
+#   git config core.hooksPath .githooks
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHON="${PYTHON:-python}"
+
+if ! "$PYTHON" "$ROOT/scripts/verify_publish_scope.py"; then
+  echo "pre-push: publish scope check failed; push aborted." >&2
+  exit 1
+fi
+
+exit 0

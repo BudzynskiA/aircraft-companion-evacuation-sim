@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: "Aircraft cabin evacuation simulation: companion separation scenarios"
+message: >-
+  If you use this software, please cite it using the metadata in this file
+  and the companion journal article (citekey companion_separation_evacuation;
+  folder separate_passengers_aircraft_safety in 04_papers/journal_articles/2026/).
+type: software
+license: MIT
+repository-code: "TBD"
+version: 0.1.0
+date-released: 2026-07-15
+keywords:
+  - aircraft evacuation
+  - agent-based model
+  - companion separation
+  - cabin safety
+preferred-citation:
+  type: article
+  title: "Companion Separation and Aircraft Cabin Evacuation Time: An Agent-Based Simulation Study"
+  year: 2026
+  notes: "Journal submission in preparation; Safety Science (round 1)."

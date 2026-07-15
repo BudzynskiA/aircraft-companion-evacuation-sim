@@ -6,7 +6,7 @@ message: >-
   folder separate_passengers_aircraft_safety in 04_papers/journal_articles/2026/).
 type: software
 license: MIT
-repository-code: "TBD"
+repository-code: "https://github.com/BudzynskiA/aircraft-companion-evacuation-sim"
 version: 0.1.0
 date-released: 2026-07-15
 keywords:

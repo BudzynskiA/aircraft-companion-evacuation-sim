@@ -16,8 +16,8 @@ PAPER_ROOT = (
     / "2026"
     / "separate_passengers_aircraft_safety"
 )
-PAPER_FIGURES = PAPER_ROOT / "figures"
-PAPER_TABLES = PAPER_ROOT / "tables"
+PAPER_FIGURES = PAPER_ROOT / "presubmission" / "figures"
+PAPER_TABLES = PAPER_ROOT / "presubmission" / "tables"
 
 HEADLINE_PCT = 0.3
 SEPARATIONS = [0, 5, 10, 20]

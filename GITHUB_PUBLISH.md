@@ -100,7 +100,7 @@ git push -u origin main
 1. Set `repository-code` in `CITATION.cff` to the real URL (e.g. `https://github.com/GITHUB_USER/aircraft-companion-evacuation-sim`).
 2. Commit and push: `python scripts/verify_publish_scope.py --staged` then `git add CITATION.cff && git commit -m "Set repository-code in CITATION.cff" && python scripts/verify_publish_scope.py && git push`.
 3. Update the companion paper:
-   - `04_papers/journal_articles/2026/separate_passengers_aircraft_safety/processed/data_availability_draft.md`
+   - `04_papers/journal_articles/2026/separate_passengers_aircraft_safety/presubmission/processed/data_availability_draft.md`
    - `04_papers/journal_articles/2026/separate_passengers_aircraft_safety/README.md` (code link section)
 
 ## Suggested release tag

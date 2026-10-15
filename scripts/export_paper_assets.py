@@ -79,6 +79,7 @@ def _plot_wait_vs_seek(df: pd.DataFrame, out_path: Path) -> None:
     ax.set_ylabel("Median T_total (s)")
     ax.set_xticks(list(x))
     ax.set_xticklabels([str(s) for s in SEPARATIONS])
+    ax.set_ylim(60, None)
     ax.legend()
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()

@@ -76,3 +76,17 @@ Use `--seed` to control the random seed base. Each iteration uses `seed + iter`.
 ```
 
 Writes `tables/sensitivity_timeout.csv` and `tables/sensitivity_reunion_prob.csv` (same seeds as the default experiment set).
+
+## Round-3 reviewer analyses (Safety 4491459, 2026-10-14)
+
+`simulate_once` has optional arguments (`mode`, `hold_until_tick`, `log`, `exit_interval_ticks`); the defaults reproduce the published runs exactly.
+
+```bash
+.\.venv\Scripts\python scripts\r3_delay_decomposition.py   # tables/r3_delay_decomposition_runs.csv
+.\.venv\Scripts\python scripts\r3_exit_flow.py             # tables/r3_exit_flow.csv
+.\.venv\Scripts\python scripts\r3_exit_capacity.py         # tables/r3_exit_capacity_runs.csv
+```
+
+- Delay decomposition (WAIT, 30% separated, 5/10/20 rows): no reunion vs partner held only vs seeker movement only vs full WAIT.
+- Exit flow: realised discharge per exit (central 80% of discharge; peak 10 s window).
+- Exit capacity: admission ceiling of 4, 2 and 1 pax/s per exit.

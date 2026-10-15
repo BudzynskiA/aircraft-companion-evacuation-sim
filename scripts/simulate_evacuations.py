@@ -131,7 +131,20 @@ def simulate_once(
     rng: np.random.Generator,
     reunion_probability: float = 1.0,
     trace: dict[str, int] | None = None,
+    mode: str = "full",
+    hold_until_tick: dict[int, int] | None = None,
+    log: dict | None = None,
+    exit_interval_ticks: int = 1,
 ) -> RunMetrics:
+    # Optional arguments added for the round-3 reviewer analyses; defaults
+    # reproduce the published runs exactly.
+    # mode: "full" (default), "hold_only" (partners held until the release tick
+    #   given in hold_until_tick, seekers egress normally) or "seeker_only"
+    #   (seekers walk to the partner's seat row, partners egress normally).
+    # log: if a dict is passed, receives partner release ticks (full WAIT),
+    #   the exit log [(time_s, exit_idx)] and the exit positions.
+    # exit_interval_ticks: exits admit passengers only every k-th tick
+    #   (k = 1 -> 4 pax/s, 2 -> 2 pax/s, 4 -> 1 pax/s per exit).
     n_rows = cabin.n_rows
     n_agents = cabin.n_rows * cabin.seats_per_row
 
@@ -228,6 +241,16 @@ def simulate_once(
 
     assert np.all((base_rows >= 0) & (base_rows < n_rows))
 
+    hold_arr = np.full(n_agents, -1, dtype=int)
+    if mode == "hold_only":
+        # Counterfactual: partners stay seated until the release tick observed
+        # in the matched full WAIT run; seekers egress as ordinary agents.
+        for k_, v_ in (hold_until_tick or {}).items():
+            hold_arr[int(k_)] = int(v_)
+        reunion_active[:] = False
+    release_log: dict[int, int] = {}
+    exit_log: list[tuple[float, int]] = []
+
     for r in base_rows:
         seat_count[r] += 1
 
@@ -254,6 +277,13 @@ def simulate_once(
     def _update_reunion_state() -> None:
         for i, j in zip(pairs_a, pairs_b, strict=True):
             if not reunion_active[i]:
+                continue
+            if mode == "seeker_only":
+                s_ = int(i) if is_seeker[i] else int(j)
+                p_ = int(j) if s_ == int(i) else int(i)
+                if abs(_pair_pos(s_) - int(base_rows[p_])) <= 1:
+                    reunion_active[i] = reunion_active[j] = False
+                    _trace("reached_seat")
                 continue
             if evacuated[i] or evacuated[j]:
                 reunion_active[i] = reunion_active[j] = False
@@ -288,7 +318,8 @@ def simulate_once(
     for t in range(max_ticks):
         now_s = t * cabin.dt_s
 
-        exit_remaining = np.full(n_exits, exits.exit_capacity_per_tick, dtype=int)
+        cap_now = exits.exit_capacity_per_tick if (t % exit_interval_ticks == 0) else 0
+        exit_remaining = np.full(n_exits, cap_now, dtype=int)
 
         # Under WAIT, the non-seeker member of an active pair stays seated at
         # its own row (outside the aisle) until the seeker arrives.
@@ -299,6 +330,14 @@ def simulate_once(
             & (~reunited)
             & (pair_of != -1)
         )
+        if mode == "seeker_only":
+            holding_seat = np.zeros(n_agents, dtype=bool)
+        if mode == "hold_only":
+            holding_seat = hold_arr > t
+        if mode == "full" and reunion_behavior == "WAIT":
+            for j_ in np.flatnonzero((pair_of != -1) & (~is_seeker) & (~holding_seat)):
+                if int(j_) not in release_log:
+                    release_log[int(j_)] = t
 
         want_enter = (~in_aisle) & (~evacuated) & (premove_s <= 0.0) & (~holding_seat)
         if np.any(want_enter):
@@ -344,7 +383,9 @@ def simulate_once(
                 seeking = bool(reunion_active[i] and is_seeker[i] and not reunited[i])
                 nearest_e, nearest_target = _nearest_exit(r, exit_positions, n_rows)
 
-                if seeking:
+                if seeking and mode == "seeker_only":
+                    target_row = int(base_rows[int(pair_of[i])])
+                elif seeking:
                     target_row = _pair_pos(int(pair_of[i]))
                     tgt_e = nearest_e
                 elif joint_exit[i] != -999:
@@ -379,6 +420,7 @@ def simulate_once(
                                 in_aisle[i] = False
                                 evacuated[i] = True
                                 evac_time_s[i] = now_s
+                                exit_log.append((now_s, int(exit_idx)))
                                 evac_count += 1
                                 dist_acc[i] = 0.0
                                 continue
@@ -438,6 +480,12 @@ def simulate_once(
     assert evac_count == n_agents, "evacuation did not complete within max time"
     assert np.all(np.isfinite(evac_time_s)), "missing evacuation times"
 
+    if log is not None:
+        # release tick of each non-seeking partner (only partners of pairs with seekers)
+        partners = [int(pair_of[k]) for k in np.flatnonzero(is_seeker)]
+        log["release"] = {j: release_log.get(j, 0) for j in partners}
+        log["exit_log"] = exit_log
+        log["exit_positions"] = exit_positions
     t_total_s = float(np.max(evac_time_s))
     t50_s = float(np.quantile(evac_time_s, 0.50))
     t90_s = float(np.quantile(evac_time_s, 0.90))
